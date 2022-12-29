@@ -594,10 +594,9 @@ function(add_executable)
                     set(EXTRA_OPTIONS USES_TERMINAL)
                 endif()
                 add_custom_command(TARGET "${target_name}" POST_BUILD
-                    COMMAND "${Z_VCPKG_POWERSHELL_PATH}" -noprofile -executionpolicy Bypass -file "${Z_VCPKG_TOOLCHAIN_DIR}/msbuild/applocal.ps1"
-                        -targetBinary "$<TARGET_FILE:${target_name}>"
-                        -installedDir "${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}$<$<CONFIG:Debug>:/debug>/bin"
-                        -OutVariable out
+                    COMMAND "${Z_VCPKG_EXECUTABLE}" z-applocal
+                        --target-binary=$<TARGET_FILE:${target_name}>
+                        --installed-bin-dir=${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}$<$<CONFIG:Debug>:/debug>/bin
                     VERBATIM
                     ${EXTRA_OPTIONS}
                 )
@@ -631,10 +630,9 @@ function(add_library)
         if(VCPKG_APPLOCAL_DEPS AND Z_VCPKG_TARGET_TRIPLET_PLAT MATCHES "windows|uwp" AND (IS_LIBRARY_SHARED STREQUAL "SHARED_LIBRARY" OR IS_LIBRARY_SHARED STREQUAL "MODULE_LIBRARY"))
             z_vcpkg_set_powershell_path()
             add_custom_command(TARGET "${target_name}" POST_BUILD
-                COMMAND "${Z_VCPKG_POWERSHELL_PATH}" -noprofile -executionpolicy Bypass -file "${Z_VCPKG_TOOLCHAIN_DIR}/msbuild/applocal.ps1"
-                    -targetBinary "$<TARGET_FILE:${target_name}>"
-                    -installedDir "${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}$<$<CONFIG:Debug>:/debug>/bin"
-                    -OutVariable out
+                    COMMAND "${Z_VCPKG_EXECUTABLE}" z-applocal
+                        --target-binary=$<TARGET_FILE:${target_name}>
+                        --installed-bin-dir=${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}$<$<CONFIG:Debug>:/debug>/bin
                     VERBATIM
             )
         endif()
@@ -687,10 +685,9 @@ function(x_vcpkg_install_local_dependencies)
             get_target_property(target_type "${target}" TYPE)
             if(NOT target_type STREQUAL "INTERFACE_LIBRARY")
                 install(CODE "message(\"-- Installing app dependencies for ${target}...\")
-                    execute_process(COMMAND \"${Z_VCPKG_POWERSHELL_PATH}\" -noprofile -executionpolicy Bypass -file \"${Z_VCPKG_TOOLCHAIN_DIR}/msbuild/applocal.ps1\"
-                        -targetBinary \"${arg_DESTINATION}/$<TARGET_FILE_NAME:${target}>\"
-                        -installedDir \"${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}$<$<CONFIG:Debug>:/debug>/bin\"
-                        -OutVariable out)"
+                    execute_process(COMMAND \"${Z_VCPKG_EXECUTABLE}\" z-applocal
+                        --target-binary=${arg_DESTINATION}/$<TARGET_FILE_NAME:${target}>
+                        --installed-bin-dir=${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}$<$<CONFIG:Debug>:/debug>/bin )"
                     ${component_param}
                 )
             endif()

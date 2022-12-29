@@ -7,11 +7,9 @@ function(z_vcpkg_copy_tool_dependencies_search tool_dir path_to_search)
     file(GLOB tools "${tool_dir}/*.exe" "${tool_dir}/*.dll" "${tool_dir}/*.pyd")
     foreach(tool IN LISTS tools)
         vcpkg_execute_required_process(
-            COMMAND "${Z_VCPKG_POWERSHELL_CORE}" -noprofile -executionpolicy Bypass -nologo
-                -file "${SCRIPTS}/buildsystems/msbuild/applocal.ps1"
-                -targetBinary "${tool}"
-                -installedDir "${path_to_search}"
-                -verbose
+            COMMAND "vcpkg.exe z-applocal"
+                --target-binary="${tool}"
+                --installed-bin-dir="${path_to_search}"
             WORKING_DIRECTORY "${VCPKG_ROOT_DIR}"
             LOGNAME copy-tool-dependencies-${count}
         )
